@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+TranslatableField = Literal["recommendation", "motivations", "notice_period"]
 
 
 class ParseResponse(BaseModel):
@@ -19,3 +23,18 @@ class ParseResponse(BaseModel):
     notice_period: str = ""
     current_salary: str = ""
     expected_salary: str = ""
+
+
+class TranslateRequest(BaseModel):
+    """Request body for POST /translate (FR2.3/FR2.6): translate one field's
+    text into Simplified Chinese. Stateless — the caller supplies the text and
+    owns storing/displaying both language versions.
+    """
+
+    field: TranslatableField
+    text: str
+
+
+class TranslateResponse(BaseModel):
+    field: TranslatableField
+    translation: str

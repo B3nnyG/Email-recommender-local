@@ -25,6 +25,7 @@ import re
 import anthropic
 
 from config import settings
+from services.claude_client import get_client
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ def _call_claude(system_prompt: str, user_text: str, fields: list[str]) -> dict:
         return blank
 
     try:
-        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+        client = get_client()
         response = client.messages.create(
             model=settings.anthropic_model,
             max_tokens=1024,

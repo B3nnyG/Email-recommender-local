@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from routers import parse
+from routers import parse, translate
 
 app = FastAPI(title="Email Recommendation Generator API")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(parse.router)
+app.include_router(translate.router)
 
 
 @app.get("/health")
