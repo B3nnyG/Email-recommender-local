@@ -18,9 +18,9 @@ async def parse_documents(
     screenshot: UploadFile = File(...),
 ) -> ParseResponse:
     """Accept a resume (pdf/docx) + notes screenshot (jpg/png), extract text from
-    each in memory (no disk writes, per NFR1.2), and return the structured data
-    schema. Structured field extraction is currently stubbed — see
-    services/llm_extraction.py for the TODO on wiring up Claude.
+    each in memory (no disk writes, per NFR1.2), run structured field extraction
+    via Claude (see services/llm_extraction.py), and return the structured data
+    schema.
     """
     resume_bytes = await read_and_validate(resume, settings.resume_extensions, "Resume")
     screenshot_bytes = await read_and_validate(
