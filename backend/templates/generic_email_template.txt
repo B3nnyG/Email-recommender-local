@@ -1,0 +1,21 @@
+Hi HR,
+
+Please consider the following candidate for the {{job_title}} role:
+
+Candidate:
+- Name: {{name}}
+- Email: {{email}}
+- Phone: {{contact_number}}
+- Nationality: 
+- Notice Period: {{notice_period}}
+- Education: {{education}}
+
+Highlights:
+{{recommendation}}
+
+Motivation:
+{{motivations}}
+
+Salary:
+- Current Salary: {{current_salary}}
+- Expected Salary: {{expected_salary}}

@@ -38,3 +38,42 @@ class TranslateRequest(BaseModel):
 class TranslateResponse(BaseModel):
     field: TranslatableField
     translation: str
+
+
+class TemplateInfo(BaseModel):
+    """One entry in GET /templates — id/label only, no file path exposed."""
+
+    id: str
+    label: str
+
+
+class EmailData(BaseModel):
+    """Full field schema (CLAUDE.md data schema table) plus job_title, which
+    is manual-only on Page 2. nationality is intentionally excluded: it is
+    manual-only on the frontend and never sent to the backend.
+    """
+
+    name: str = ""
+    email: str = ""
+    contact_number: str = ""
+    education: str = ""
+    job_title: str = ""
+    # The RECIPIENT client's company — i.e. the company this recommendation
+    # email is being sent to. Unrelated to the candidate or their current/past
+    # employer. Mandatory, manually entered (CLAUDE.md Subject Generation).
+    company_name: str = ""
+    recommendation: str = ""
+    motivations: str = ""
+    notice_period: str = ""
+    current_salary: str = ""
+    expected_salary: str = ""
+
+
+class GenerateEmailRequest(BaseModel):
+    template_id: str
+    data: EmailData
+
+
+class GenerateEmailResponse(BaseModel):
+    subject: str
+    rendered_email: str

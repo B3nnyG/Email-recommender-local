@@ -1,0 +1,12 @@
+[
+  {
+    "id": "generic",
+    "label": "Generic",
+    "file": "generic_email_template.txt"
+  },
+  {
+    "id": "apodex",
+    "label": "Apodex",
+    "file": "apodex_email_template.txt"
+  }
+]
