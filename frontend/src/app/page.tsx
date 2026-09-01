@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { FileUploadSlot } from "@/components/upload/file-upload-slot";
@@ -21,6 +22,7 @@ const SCREENSHOT_ACCEPT = {
 };
 
 export default function UploadPage() {
+  const router = useRouter();
   const { setParsedData } = useParsedData();
   const [resume, setResume] = useState<File | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -39,6 +41,7 @@ export default function UploadPage() {
       const data = await parseDocuments(resume, screenshot);
       setParsedData(data);
       console.log("Parsed data from /parse:", data);
+      router.push("/review");
     } catch (error) {
       const message =
         error instanceof ApiError
