@@ -1,4 +1,4 @@
-import type { ParsedData, TranslatableField } from "@/lib/types";
+import type { GeneratedEmail, ParsedData, ReviewedData, TemplateInfo, TranslatableField } from "@/lib/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -36,4 +36,33 @@ export async function translateField(field: TranslatableField, text: string): Pr
 
   const data: { translation: string } = await response.json();
   return data.translation;
+}
+
+export async function getTemplates(): Promise<TemplateInfo[]> {
+  const response = await fetch(`${API_BASE_URL}/templates`);
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new ApiError(detail || `Templates request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function generateEmail(
+  templateId: string,
+  data: ReviewedData,
+): Promise<GeneratedEmail> {
+  const response = await fetch(`${API_BASE_URL}/generate-email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template_id: templateId, data }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new ApiError(detail || `Generate email request failed with status ${response.status}`);
+  }
+
+  return response.json();
 }

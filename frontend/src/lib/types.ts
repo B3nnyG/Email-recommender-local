@@ -26,8 +26,9 @@ export interface TranslationState {
   active: "en" | "zh";
 }
 
-/** Mirrors backend EmailData (backend/models/schemas.py) — the full payload
- * Page 3 will eventually send to POST /generate-email as `data`. */
+/** Mirrors backend EmailData (backend/models/schemas.py) — the flattened
+ * payload Page 3 sends to POST /generate-email as `data` (translatable
+ * fields resolved to whichever EN/ZH version was active on Page 2). */
 export interface ReviewedData {
   name: string;
   email: string;
@@ -40,4 +41,34 @@ export interface ReviewedData {
   notice_period: string;
   current_salary: string;
   expected_salary: string;
+}
+
+/** Live Page 2 editing state, kept in context so navigating to Page 3 and
+ * back (unlike the Page 1 <-> 2 back, which clears everything) preserves
+ * every field exactly as edited — including both EN/ZH versions and which
+ * one is active, not just the flattened text `ReviewedData` carries. */
+export interface ReviewDraft {
+  name: string;
+  email: string;
+  contact_number: string;
+  education: string;
+  job_title: string;
+  company_name: string;
+  current_salary: string;
+  expected_salary: string;
+  recommendation: TranslationState;
+  motivations: TranslationState;
+  notice_period: TranslationState;
+}
+
+/** One entry from GET /templates. */
+export interface TemplateInfo {
+  id: string;
+  label: string;
+}
+
+/** Response shape from POST /generate-email. */
+export interface GeneratedEmail {
+  subject: string;
+  rendered_email: string;
 }

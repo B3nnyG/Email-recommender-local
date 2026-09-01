@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
 
 import { ReviewTextField } from "@/components/review/review-text-field";
 import { TranslatableField } from "@/components/review/translatable-field";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParsedData } from "@/context/parsed-data-context";
-import type { ReviewedData, TranslatableField as TranslatableFieldKey, TranslationState } from "@/lib/types";
+import {
+  createInitialReviewDraft,
+  isReviewDraftValid,
+  TRANSLATABLE_FIELD_KEYS,
+} from "@/lib/review-draft";
+import type { ReviewDraft, TranslatableField as TranslatableFieldKey } from "@/lib/types";
 
 interface SimpleFieldConfig {
-  key: "name" | "email" | "contact_number" | "education" | "job_title" | "company_name" | "current_salary" | "expected_salary";
+  key: Exclude<keyof ReviewDraft, TranslatableFieldKey>;
   label: string;
   /** Whether this field is populated by /parse (vs. always manual-only). */
   wasParsed: boolean;
@@ -36,59 +39,40 @@ const TRANSLATABLE_FIELDS: { key: TranslatableFieldKey; label: string }[] = [
   { key: "notice_period", label: "Notice Period" },
 ];
 
-function activeText(state: TranslationState): string {
-  return state.active === "en" ? state.en : (state.zh ?? "");
-}
-
 export default function ReviewPage() {
   const router = useRouter();
-  const { parsedData, setReviewedData, resetFlow } = useParsedData();
-
-  const [simpleValues, setSimpleValues] = useState<Record<SimpleFieldConfig["key"], string>>(() => ({
-    name: parsedData?.name ?? "",
-    email: parsedData?.email ?? "",
-    contact_number: parsedData?.contact_number ?? "",
-    education: parsedData?.education ?? "",
-    job_title: "",
-    company_name: "",
-    current_salary: parsedData?.current_salary ?? "",
-    expected_salary: parsedData?.expected_salary ?? "",
-  }));
-
-  const [translations, setTranslations] = useState<Record<TranslatableFieldKey, TranslationState>>(() => ({
-    recommendation: { en: parsedData?.recommendation ?? "", zh: null, active: "en" },
-    motivations: { en: parsedData?.motivations ?? "", zh: null, active: "en" },
-    notice_period: { en: parsedData?.notice_period ?? "", zh: null, active: "en" },
-  }));
-
-  const [saved, setSaved] = useState(false);
+  const { parsedData, reviewDraft, setReviewDraft, resetFlow } = useParsedData();
 
   // Fields that came back blank from /parse (extraction failure, FR2.11) —
-  // captured once so it stays distinct from the user's live edits.
+  // captured once from the immutable parse result, so it stays distinct
+  // from the user's live edits in reviewDraft.
   const extractionFailed = useMemo(() => {
     if (!parsedData) return new Set<string>();
     const failed = new Set<string>();
     for (const { key, wasParsed } of SIMPLE_FIELDS) {
       if (wasParsed && !parsedData[key as keyof typeof parsedData]) failed.add(key);
     }
-    for (const { key } of TRANSLATABLE_FIELDS) {
+    for (const key of TRANSLATABLE_FIELD_KEYS) {
       if (!parsedData[key]) failed.add(key);
     }
     return failed;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [parsedData]);
 
   useEffect(() => {
     if (!parsedData) {
       router.replace("/");
+      return;
     }
-  }, [parsedData, router]);
+    // Only seed a fresh draft the first time through — if one already
+    // exists (returning via Back from Page 3), keep every edit as-is.
+    if (!reviewDraft) {
+      setReviewDraft(createInitialReviewDraft(parsedData));
+    }
+  }, [parsedData, reviewDraft, router, setReviewDraft]);
 
-  if (!parsedData) return null;
+  if (!parsedData || !reviewDraft) return null;
 
-  const isValid =
-    SIMPLE_FIELDS.every(({ key }) => simpleValues[key].trim() !== "") &&
-    TRANSLATABLE_FIELDS.every(({ key }) => activeText(translations[key]).trim() !== "");
+  const isValid = isReviewDraftValid(reviewDraft);
 
   const handleBack = () => {
     resetFlow();
@@ -97,24 +81,7 @@ export default function ReviewPage() {
 
   const handleNext = () => {
     if (!isValid) return;
-
-    const reviewed: ReviewedData = {
-      name: simpleValues.name,
-      email: simpleValues.email,
-      contact_number: simpleValues.contact_number,
-      education: simpleValues.education,
-      job_title: simpleValues.job_title,
-      company_name: simpleValues.company_name,
-      current_salary: simpleValues.current_salary,
-      expected_salary: simpleValues.expected_salary,
-      recommendation: activeText(translations.recommendation),
-      motivations: activeText(translations.motivations),
-      notice_period: activeText(translations.notice_period),
-    };
-
-    setReviewedData(reviewed);
-    console.log("Reviewed data ready for Page 3:", reviewed);
-    setSaved(true);
+    router.push("/generate");
   };
 
   return (
@@ -134,11 +101,8 @@ export default function ReviewPage() {
                 key={key}
                 id={key}
                 label={label}
-                value={simpleValues[key]}
-                onChange={(value) => {
-                  setSimpleValues((prev) => ({ ...prev, [key]: value }));
-                  setSaved(false);
-                }}
+                value={reviewDraft[key]}
+                onChange={(value) => setReviewDraft((prev) => (prev ? { ...prev, [key]: value } : prev))}
                 showExtractionWarning={wasParsed && extractionFailed.has(key)}
               />
             ))}
@@ -150,24 +114,14 @@ export default function ReviewPage() {
                 key={key}
                 fieldKey={key}
                 label={label}
-                state={translations[key]}
-                onChange={(next) => {
-                  setTranslations((prev) => ({ ...prev, [key]: next }));
-                  setSaved(false);
-                }}
+                state={reviewDraft[key]}
+                onChange={(next) =>
+                  setReviewDraft((prev) => (prev ? { ...prev, [key]: next } : prev))
+                }
                 showExtractionWarning={extractionFailed.has(key)}
               />
             ))}
           </div>
-
-          {saved && (
-            <Alert>
-              <CheckCircle2 className="size-4" />
-              <AlertDescription>
-                Saved — this candidate&apos;s details are ready for the next step.
-              </AlertDescription>
-            </Alert>
-          )}
 
           <div className="flex justify-between">
             <Button type="button" variant="outline" onClick={handleBack}>
