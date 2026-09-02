@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+import { AppShell } from "@/components/layout/app-shell";
 import { FileUploadSlot } from "@/components/upload/file-upload-slot";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -54,10 +55,10 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 p-6 dark:bg-black">
-      <Card className="w-full max-w-2xl">
+    <AppShell step={1}>
+      <Card className="h-fit w-full max-w-2xl rounded-[12px] border-[0.5px] border-gray-200 [--card-spacing:1.5rem]">
         <CardHeader>
-          <CardTitle>Upload candidate documents</CardTitle>
+          <CardTitle className="font-serif text-xl font-medium">Upload candidate documents</CardTitle>
           <CardDescription>
             Upload the candidate&apos;s resume and a screenshot of your notes to get started.
           </CardDescription>
@@ -69,6 +70,7 @@ export default function UploadPage() {
               helperText="PDF or DOCX, up to 10MB"
               accept={RESUME_ACCEPT}
               acceptLabel=".pdf, .docx"
+              formatLabel="PDF · DOCX"
               file={resume}
               onFileChange={setResume}
             />
@@ -77,6 +79,7 @@ export default function UploadPage() {
               helperText="JPG or PNG, up to 10MB"
               accept={SCREENSHOT_ACCEPT}
               acceptLabel=".jpg, .jpeg, .png"
+              formatLabel="JPG · PNG"
               file={screenshot}
               onFileChange={setScreenshot}
             />
@@ -96,6 +99,6 @@ export default function UploadPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </AppShell>
   );
 }

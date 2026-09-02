@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -166,10 +167,12 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 p-6 dark:bg-black">
-      <Card className="w-full max-w-3xl">
+    <AppShell step={3}>
+      <Card className="h-fit w-full max-w-3xl rounded-[12px] border-[0.5px] border-gray-200 [--card-spacing:1.5rem]">
         <CardHeader>
-          <CardTitle>Generate the recommendation email</CardTitle>
+          <CardTitle className="font-serif text-xl font-medium">
+            Generate the recommendation email
+          </CardTitle>
           <CardDescription>
             Pick a template and generate the email, then make any final edits before copying it.
           </CardDescription>
@@ -239,7 +242,7 @@ export default function GeneratePage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Button type="button" variant="outline" onClick={handleCopy}>
+                <Button type="button" onClick={handleCopy}>
                   {copyStatus === "copied" ? (
                     <Check className="size-4" />
                   ) : (
@@ -262,7 +265,7 @@ export default function GeneratePage() {
           )}
 
           <div className="flex justify-between border-t pt-6">
-            <Button type="button" variant="outline" onClick={handleBack}>
+            <Button type="button" variant="ghost" className="text-gray-500 hover:text-gray-700" onClick={handleBack}>
               Back
             </Button>
             <Button type="button" variant="secondary" onClick={handleStartNew}>
@@ -292,6 +295,6 @@ export default function GeneratePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </AppShell>
   );
 }

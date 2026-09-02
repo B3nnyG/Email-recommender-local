@@ -2,10 +2,10 @@ Hi HR,
 
 Please consider the following candidate for the {{job_title}} role:
 
-Name：{{name}}
-Job Title：{{job_title}}
-Nationality：
-Highlights：{{recommendation}}
+姓名：{{name}}
+岗位：{{job_title}}
+现居住地和Visa：
+推荐理由：{{recommendation}}
 
 ==============================================================
 For internal reference

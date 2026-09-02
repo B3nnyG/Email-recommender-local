@@ -15,6 +15,8 @@ interface FileUploadSlotProps {
   helperText: string;
   accept: Accept;
   acceptLabel: string;
+  /** Short format badge shown in the top-right corner, e.g. "PDF · DOCX". Display-only. */
+  formatLabel: string;
   file: File | null;
   onFileChange: (file: File | null) => void;
 }
@@ -28,6 +30,7 @@ export function FileUploadSlot({
   helperText,
   accept,
   acceptLabel,
+  formatLabel,
   file,
   onFileChange,
 }: FileUploadSlotProps) {
@@ -87,29 +90,30 @@ export function FileUploadSlot({
 
   return (
     <div className="flex flex-col gap-2">
-      <div>
-        <p className="font-medium text-sm">{label}</p>
-        <p className="text-muted-foreground text-xs">{helperText}</p>
-      </div>
+      <p className="text-sm font-medium">{label}</p>
 
       <div
         {...getRootProps()}
         className={cn(
-          "flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center transition-colors",
-          isDragActive && "border-primary bg-primary/5",
-          !isDragActive && "border-muted-foreground/25 hover:border-muted-foreground/50",
+          "relative flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-dashed p-4 text-center transition-colors",
+          isDragActive && "border-[#2563EB] bg-[#2563EB]/5",
+          !isDragActive && "border-gray-300 hover:border-gray-400",
           file && "cursor-default",
         )}
       >
         <input {...getInputProps()} />
 
+        <span className="absolute top-2 right-3 text-[11px] font-medium tracking-wide text-gray-500 uppercase">
+          {formatLabel}
+        </span>
+
         {!file && (
           <>
-            <Upload className="text-muted-foreground size-6" />
-            <p className="text-sm">
-              Drag & drop, or <span className="text-primary underline">click to browse</span>
+            <Upload className="size-6 text-gray-400" />
+            <p className="text-sm text-gray-600">
+              Drop file or <span className="text-[#2563EB]">browse</span>
             </p>
-            <p className="text-muted-foreground text-xs">{acceptLabel}</p>
+            <p className="text-muted-foreground text-xs">{helperText}</p>
           </>
         )}
 
