@@ -1,0 +1,27 @@
+Hi HR,
+
+Please kindly consider below candidate for the {{job_title}} role
+
+Candidate:
+学历&年龄：{{education}}
+目前状态：
+公司-事业部-团队-汇报对象：
+职级（职级&晋升情况）&绩效（近两年绩效情况）：
+看机会原因: {{motivations}}
+目前所在地&期望工作地：
+各个阶段是否有空档期及具体原因：N/A
+其他机会（公司名、岗位、阶段、截止日期，选择机会的考虑因素）: 
+预计入职时间：{{notice_period}}
+中英文沟通：
+是否满足身份要求（新加坡公民身份or PR/美国公民or绿卡）：
+
+Highlights:
+{{recommendation}}
+
+
+Motivation:
+{{motivations}}
+
+Salary:
+Current Salary: {{current_salary}}
+Expected Salary: {{expected_salary}}

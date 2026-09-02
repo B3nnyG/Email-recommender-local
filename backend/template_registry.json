@@ -8,5 +8,10 @@
     "id": "apodex",
     "label": "Apodex",
     "file": "apodex_email_template.txt"
+  },
+  {
+    "id": "rednote",
+    "label": "Rednote",
+    "file": "rednote_email_template.txt"
   }
 ]
