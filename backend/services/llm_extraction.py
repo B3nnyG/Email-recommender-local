@@ -43,9 +43,14 @@ If a field cannot be confidently extracted from the text, set it to an empty str
 
 SCREENSHOT_SYSTEM_PROMPT = """You are extracting structured fields from an HR recruiter's notes (OCR text from a screenshot) for an HR system.
 
-The notes may reference RFL (Reason for Leaving) and LF (Looking For). Given the text, return ONLY a single JSON object with exactly these keys — no markdown, no code fences, no explanation:
+The notes are noisy OCR output containing many unrelated bullet points (team info, tech stack, performance reviews, salary details, other job applications, etc). Given the text, return ONLY a single JSON object with exactly these keys — no markdown, no code fences, no explanation:
 
-- "motivations": Combine the candidate's Reason for Leaving (RFL) and Looking For (LF) into a single HR-appropriate paragraph describing the candidate's motivations. Never surface the raw labels "RFL" or "LF" in the output — rewrite them into natural, professional language.
+- "motivations": The candidate's Reason for Leaving (RFL) and Looking For (LF), combined into a single HR-appropriate sentence/paragraph. To find this content:
+  1. Search the ENTIRE text for lines containing "RFL" and "LF" anywhere — they may appear inline after a label on one line, as separate bullet points below a "Motivations:" header, indented, or scattered among many unrelated bullets. Ignore everything that isn't RFL/LF content.
+  2. The content after "RFL:" or "LF:" may be in English, Chinese, or a mix of both (e.g. "RFL: 系统比较成熟而且组架构一直调整...") — extract the full content regardless of language, and write the final "motivations" output in English.
+  3. Combine whatever RFL and LF content you find into one natural, professional sentence. Never surface the raw labels "RFL" or "LF" in the output.
+  4. If no lines labeled "RFL" or "LF" exist anywhere, but a "Motivations:" label with inline text is present, use that text directly instead.
+  5. Only return an empty string if none of the above (RFL, LF, or a Motivations label) can be found anywhere in the text — do not guess or fabricate.
 - "notice_period": the candidate's notice period.
 - "current_salary": the candidate's current salary (may be labeled CS).
 - "expected_salary": the candidate's expected salary (may be labeled ES).
@@ -62,7 +67,7 @@ def _extract_json_object(text: str) -> dict:
 
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
-        raise
+        raise ValueError("No JSON object found in response text")
     return json.loads(match.group(0))
 
 
@@ -81,7 +86,7 @@ def _call_claude(system_prompt: str, user_text: str, fields: list[str]) -> dict:
         )
         raw_text = "".join(block.text for block in response.content if block.type == "text")
         parsed = _extract_json_object(raw_text)
-    except (anthropic.APIError, json.JSONDecodeError, AttributeError) as exc:
+    except (anthropic.APIError, json.JSONDecodeError, ValueError, AttributeError) as exc:
         logger.warning("Claude extraction failed, returning blank fields: %s", exc)
         return blank
 

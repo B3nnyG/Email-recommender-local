@@ -13,7 +13,7 @@ def extract_screenshot_text(content: bytes) -> str:
     """Run local Tesseract OCR over the notes/chat screenshot (FR2.4)."""
     try:
         image = Image.open(io.BytesIO(content))
-        return pytesseract.image_to_string(image).strip()
+        return pytesseract.image_to_string(image, lang="eng+chi_sim").strip()
     except pytesseract.TesseractNotFoundError as exc:
         raise HTTPException(
             status_code=500,

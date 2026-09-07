@@ -57,7 +57,8 @@ export default function GeneratePage() {
 
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const [subjectCopyStatus, setSubjectCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const [bodyCopyStatus, setBodyCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
 
   useEffect(() => {
     if (!parsedData) {
@@ -100,7 +101,8 @@ export default function GeneratePage() {
   const generateFor = async (templateId: string) => {
     setIsGenerating(true);
     setGenerateError(null);
-    setCopyStatus("idle");
+    setSubjectCopyStatus("idle");
+    setBodyCopyStatus("idle");
 
     try {
       const data = toReviewedData(reviewDraft);
@@ -148,11 +150,16 @@ export default function GeneratePage() {
     void generateFor(selectedTemplateId);
   };
 
-  const handleCopy = async () => {
-    const text = `Subject: ${subject}\n\n${body}`;
-    const succeeded = await copyToClipboard(text);
-    setCopyStatus(succeeded ? "copied" : "failed");
-    window.setTimeout(() => setCopyStatus("idle"), 2000);
+  const handleCopySubject = async () => {
+    const succeeded = await copyToClipboard(subject);
+    setSubjectCopyStatus(succeeded ? "copied" : "failed");
+    window.setTimeout(() => setSubjectCopyStatus("idle"), 2000);
+  };
+
+  const handleCopyBody = async () => {
+    const succeeded = await copyToClipboard(body);
+    setBodyCopyStatus(succeeded ? "copied" : "failed");
+    window.setTimeout(() => setBodyCopyStatus("idle"), 2000);
   };
 
   const handleBack = () => {
@@ -227,7 +234,37 @@ export default function GeneratePage() {
             <div className="flex flex-col gap-4 border-t pt-6">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopySubject}
+                    aria-label="Copy subject"
+                  >
+                    {subjectCopyStatus === "copied" ? (
+                      <Check className="size-4" />
+                    ) : (
+                      <Copy className="size-4" />
+                    )}
+                  </Button>
+                </div>
+                {subjectCopyStatus === "copied" && (
+                  <span className="text-sm font-medium text-emerald-600 dark:text-emerald-500">
+                    Copied!
+                  </span>
+                )}
+                {subjectCopyStatus === "failed" && (
+                  <span className="text-destructive text-sm font-medium">
+                    Copy failed — please select and copy manually.
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -242,20 +279,20 @@ export default function GeneratePage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Button type="button" onClick={handleCopy}>
-                  {copyStatus === "copied" ? (
+                <Button type="button" onClick={handleCopyBody}>
+                  {bodyCopyStatus === "copied" ? (
                     <Check className="size-4" />
                   ) : (
                     <Copy className="size-4" />
                   )}
                   Copy
                 </Button>
-                {copyStatus === "copied" && (
+                {bodyCopyStatus === "copied" && (
                   <span className="text-sm font-medium text-emerald-600 dark:text-emerald-500">
                     Copied!
                   </span>
                 )}
-                {copyStatus === "failed" && (
+                {bodyCopyStatus === "failed" && (
                   <span className="text-destructive text-sm font-medium">
                     Copy failed — please select and copy manually.
                   </span>

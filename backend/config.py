@@ -10,7 +10,11 @@ class Settings(BaseSettings):
     resume_extensions: set[str] = {".pdf", ".docx"}
     screenshot_extensions: set[str] = {".jpg", ".jpeg", ".png"}
 
-    cors_origins: list[str] = ["http://localhost:3000", "https://email-recommender-local.vercel.app"]
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://email-recommender-local.vercel.app",
+    ]
 
     class Config:
         env_file = ".env"
