@@ -9,9 +9,12 @@ Resume fields (FR2.1):
     highlights."
 
 Screenshot fields (FR2.4/FR2.5):
-  - RFL (Reason for Leaving) + LF (Looking For) combined into one HR-appropriate
-    "motivations" paragraph (never surface raw RFL/LF labels), notice_period,
-    current_salary (CS), expected_salary (ES).
+  - "motivations": read semantically, not by searching for literal labels (the
+    source may or may not use "RFL"/"LF"/"Motivations:") — identify why the
+    candidate is open to moving and what they're looking for next, wherever
+    and however that's phrased, and combine it into one HR-appropriate
+    paragraph (never surface raw source labels). notice_period, current_salary
+    (CS), expected_salary (ES).
 
 Every field falls back to "" if it can't be confidently extracted (FR2.11:
 "if a field cannot be confidently extracted, leave it blank and flag it for
@@ -45,12 +48,12 @@ SCREENSHOT_SYSTEM_PROMPT = """You are extracting structured fields from an HR re
 
 The notes are noisy OCR output containing many unrelated bullet points (team info, tech stack, performance reviews, salary details, other job applications, etc). Given the text, return ONLY a single JSON object with exactly these keys — no markdown, no code fences, no explanation:
 
-- "motivations": The candidate's Reason for Leaving (RFL) and Looking For (LF), combined into a single HR-appropriate sentence/paragraph. To find this content:
-  1. Search the ENTIRE text for lines containing "RFL" and "LF" anywhere — they may appear inline after a label on one line, as separate bullet points below a "Motivations:" header, indented, or scattered among many unrelated bullets. Ignore everything that isn't RFL/LF content.
-  2. The content after "RFL:" or "LF:" may be in English, Chinese, or a mix of both (e.g. "RFL: 系统比较成熟而且组架构一直调整...") — extract the full content regardless of language, and write the final "motivations" output in English.
-  3. Combine whatever RFL and LF content you find into one natural, professional sentence. Never surface the raw labels "RFL" or "LF" in the output.
-  4. If no lines labeled "RFL" or "LF" exist anywhere, but a "Motivations:" label with inline text is present, use that text directly instead.
-  5. Only return an empty string if none of the above (RFL, LF, or a Motivations label) can be found anywhere in the text — do not guess or fabricate.
+- "motivations": Read the notes as a whole (don't search for specific labels like "RFL", "LF", or "Motivations:" — the source may or may not use those, and may phrase things differently or not label them at all). Identify:
+  1. WHY the candidate is open to moving roles — dissatisfaction with their current situation, career stage, team or company issues, and similar signals — however that's phrased in the source.
+  2. WHAT the candidate is looking for next — industry, company stage, tech stack, growth opportunities, and similar signals — however that's phrased in the source.
+  This content may be in English, Chinese, or a mix of both, and may appear as one bullet, several scattered bullets, or a single sentence anywhere in the text. Synthesize whatever relevant content you find (regardless of source language) into ONE natural, HR-appropriate sentence or short paragraph, written in English. Never surface raw source labels like "RFL" or "LF" in the output.
+  Explicitly ignore content that isn't about reasons for moving or what the candidate wants next — team structure, tech stack details, performance ratings, salary figures, other job applications, and notice period all belong to other fields (or nowhere), not here, even when they sit in the same bullet list.
+  Only return an empty string if the text genuinely contains no discernible signal about why the candidate is moving or what they're looking for — do not guess or fabricate content that isn't there.
 - "notice_period": the candidate's notice period.
 - "current_salary": the candidate's current salary (may be labeled CS).
 - "expected_salary": the candidate's expected salary (may be labeled ES).
